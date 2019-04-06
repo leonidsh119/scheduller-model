@@ -7,6 +7,8 @@ abstract sig Action {
 
 one sig InitAction, CreateAction, DispatchAction, TimeoutAction, BlockAction, WakeupAction, DestroyReadyAction, DestroyCurrentAction, DestroyBlockedAction extends Action {}
 
+sig CProcess extends Process {}
+
 one sig NullProcess extends Process {}
 
 fact {
@@ -20,73 +22,73 @@ pred Inv[t : Time] {
 }
 
 pred Init[t : Time] {
-	all p : Process - NullProcess | p.state.t = Free
+	all p : CProcess | p.state.t = Free
 	NullProcess.state.t = Current
 	currentAction.t = InitAction
 }
 
-pred Create[t, t' : Time, p : Process] {
+pred Create[t, t' : Time, p : CProcess] {
 	CreateProcess[t, t', p]
 	PreserveStateProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = CreateAction
 }
 
-pred Dispatch[t, t' : Time, p : Process] {
+pred Dispatch[t, t' : Time, p : CProcess] {
 	DispatchProcess[t, t', p]
 	TimeoutProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = DispatchAction
 }
 
-pred Timeout[t, t' : Time, p : Process] {
+pred Timeout[t, t' : Time, p : CProcess] {
 	TimeoutProcess[t, t', p]
 	DispatchProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = TimeoutAction
 }
 
-pred Block[t, t' : Time, p : Process] {
+pred Block[t, t' : Time, p : CProcess] {
 	BlockProcess[t, t', p]
 	DispatchProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = BlockAction
 }
 
-pred Wakeup[t, t' : Time, p : Process] {
+pred Wakeup[t, t' : Time, p : CProcess] {
 	WakeupProcess[t, t', p]
 	TimeoutProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = WakeupAction
 }
 
-pred DestroyReady[t, t' : Time, p : Process] {
+pred DestroyReady[t, t' : Time, p : CProcess] {
 	DestroyReadyProcess[t, t', p]
 	PreserveStateProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = DestroyReadyAction
 }
 
-pred DestroyCurrent[t, t' : Time, p : Process] {
+pred DestroyCurrent[t, t' : Time, p : CProcess] {
 	DestroyCurrentProcess[t, t', p]
 	DispatchProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = DestroyCurrentAction
 }
 
-pred DestroyBlocked[t, t' : Time, p : Process] {
+pred DestroyBlocked[t, t' : Time, p : CProcess] {
 	DestroyBlockedProcess[t, t', p]
 	PreserveStateProcess[t, t', NullProcess]
 	PreserveState[t, t', p]
 	currentAction.t' = DestroyBlockedAction
 }
 
-pred	PreserveState[t, t' : Time, p : Process] {
-	all other : Process - NullProcess - p | PreserveStateProcess[t, t', other]
+pred	PreserveState[t, t' : Time, p : CProcess] {
+	all other : CProcess - p | PreserveStateProcess[t, t', other]
 }
 
 pred PerformSomeAction[t, t' : Time] {
-	some p : Process |
+	some p : CProcess |
 		Create[t, t', p]
 		or Dispatch[t, t', p]
 		or Timeout[t, t', p]

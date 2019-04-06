@@ -7,7 +7,7 @@ abstract sig PState {}
 
 one sig Free, Ready, Current, Blocked extends PState {}
 
-sig Process {
+abstract sig Process {
 	state : PState one -> Time
 }
 

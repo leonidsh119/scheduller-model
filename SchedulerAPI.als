@@ -60,7 +60,7 @@ check { all t : Time | Init[t] => inv[t] } for 4
 
 run { some t:Time | Init[t] } for 4 but 1 Time
 
-pred Dispatch[t,t':Time, p:Process] {
+pred Dispatch[t, t' : Time, p : Process] {
 	Set_exists[t.ready, p]
 	p != NullProcess
 
@@ -75,8 +75,12 @@ pred Dispatch[t,t':Time, p:Process] {
 	not Set_exists[t'.ready, p]
 	Set_exists[t'.ready, NullProcess]
  
-	blocked.t' = blocked.t
-	free.t' = free.t
+	t'.blocked = t.blocked
+	t'.free = t.free
+}
+
+pred Block[t, t' : Time, p : Process] {
+	
 }
 
 run { some t,t':Time, p:Process | inv[t] and Dispatch[t,t',p] } for 3 but 2 Time
