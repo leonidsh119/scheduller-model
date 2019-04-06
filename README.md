@@ -10,5 +10,5 @@ Use MIT Alloy Analyzer. Can be downloaded from here: http://alloytools.org/downl
 
 ## Process State Machine
 
-[[https://github.com/username/repository/blob/master/img/octocat.png|alt=StateMachine]]
+[[https://github.com/leonidsh119/scheduller-model/blob/master/ProcessSM.png|alt=StateMachine]]
 
