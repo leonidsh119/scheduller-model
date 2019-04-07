@@ -9,16 +9,13 @@ one sig InitAction, CreateAction, DispatchAction, TimeoutAction, BlockAction, Wa
 
 sig CProcess extends Process {}
 
-one sig NullProcess extends Process {}
-
-fact {
-	all t : Time | Inv[t]
+one sig NullProcess extends Process {} {
+	all t : Time | state.t = Current or state.t = Ready
 }
 
 pred Inv[t : Time] {
 	one p : Process | p.state.t = Current
-	some p : Process | p.state.t = Free
-	(NullProcess.state.t = Current or NullProcess.state.t = Ready)
+//	some p : Process | p.state.t = Free
 }
 
 pred Init[t : Time] {
@@ -27,60 +24,89 @@ pred Init[t : Time] {
 	currentAction.t = InitAction
 }
 
-pred Create[t, t' : Time, p : CProcess] {
-	CreateProcess[t, t', p]
-	PreserveStateProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = CreateAction
+assert InitOK {
+	all t' : Time | Init[t'] => Inv[t']
 }
 
-pred Dispatch[t, t' : Time, p : CProcess] {
-	DispatchProcess[t, t', p]
-	TimeoutProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = DispatchAction
+check InitOK for 3 but 1 Time
+
+pred Create[t, t' : Time] {
+	some p : CProcess {
+		CreateProcess[t, t', p]
+		PreserveStateProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = CreateAction
+	}
 }
 
-pred Timeout[t, t' : Time, p : CProcess] {
-	TimeoutProcess[t, t', p]
-	DispatchProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = TimeoutAction
+assert CreateOK {
+	all t, t' : Time | Inv[t] and Create[t, t'] => Inv[t']
 }
 
-pred Block[t, t' : Time, p : CProcess] {
-	BlockProcess[t, t', p]
-	DispatchProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = BlockAction
+check CreateOK for 3 but 2 Time
+
+
+pred Dispatch[t, t' : Time] {
+	some p : CProcess {
+		DispatchProcess[t, t', p]
+		TimeoutProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = DispatchAction
+	}
 }
 
-pred Wakeup[t, t' : Time, p : CProcess] {
-	WakeupProcess[t, t', p]
-	TimeoutProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = WakeupAction
+pred Timeout[t, t' : Time] {
+	some p : CProcess {
+		TimeoutProcess[t, t', p]
+		DispatchProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = TimeoutAction
+	}
 }
 
-pred DestroyReady[t, t' : Time, p : CProcess] {
-	DestroyReadyProcess[t, t', p]
-	PreserveStateProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = DestroyReadyAction
+pred Block[t, t' : Time] {
+	some p : CProcess {
+		BlockProcess[t, t', p]
+		DispatchProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = BlockAction
+	}
 }
 
-pred DestroyCurrent[t, t' : Time, p : CProcess] {
-	DestroyCurrentProcess[t, t', p]
-	DispatchProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = DestroyCurrentAction
+pred Wakeup[t, t' : Time] {
+	some p : CProcess {
+		WakeupProcess[t, t', p]
+		TimeoutProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = WakeupAction
+	}
 }
 
-pred DestroyBlocked[t, t' : Time, p : CProcess] {
-	DestroyBlockedProcess[t, t', p]
-	PreserveStateProcess[t, t', NullProcess]
-	PreserveState[t, t', p]
-	currentAction.t' = DestroyBlockedAction
+pred DestroyReady[t, t' : Time] {
+	some p : CProcess {
+		DestroyReadyProcess[t, t', p]
+		PreserveStateProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = DestroyReadyAction
+	}
+}
+
+pred DestroyCurrent[t, t' : Time] {
+	some p : CProcess {
+		DestroyCurrentProcess[t, t', p]
+		DispatchProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = DestroyCurrentAction
+	}
+}
+
+pred DestroyBlocked[t, t' : Time] {
+	some p : CProcess {
+		DestroyBlockedProcess[t, t', p]
+		PreserveStateProcess[t, t', NullProcess]
+		PreserveState[t, t', p]
+		currentAction.t' = DestroyBlockedAction
+	}
 }
 
 pred	PreserveState[t, t' : Time, p : CProcess] {
@@ -88,22 +114,24 @@ pred	PreserveState[t, t' : Time, p : CProcess] {
 }
 
 pred PerformSomeAction[t, t' : Time] {
-	some p : CProcess |
-		Create[t, t', p]
-		or Dispatch[t, t', p]
-		or Timeout[t, t', p]
-		or Block[t, t', p]
-		or Wakeup[t, t', p]
-		or DestroyReady[t, t', p]
-		or DestroyCurrent[t, t', p]
-		or DestroyBlocked[t, t', p]
+	Create[t, t']
+	or Dispatch[t, t']
+	or Timeout[t, t']
+	or Block[t, t']
+	or Wakeup[t, t']
+	or DestroyReady[t, t']
+	or DestroyCurrent[t, t']
+	or DestroyBlocked[t, t']
 }
 
 run {
+} 
+
+fact {
 	Init[first]
 	all t, t' : Time | t -> t' in next => PerformSomeAction[t, t']
-} for 5  but 9 Action, 10 Time
+}
 
 check { 
-	all t : Time | Init[t] => Inv[t]
+	all t : Time| Inv[t]
 }
