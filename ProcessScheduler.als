@@ -15,7 +15,6 @@ one sig NullProcess extends Process {} {
 
 pred Inv[t : Time] {
 	one p : Process | p.state.t = Current
-//	some p : Process | p.state.t = Free
 }
 
 pred Init[t : Time] {
@@ -45,7 +44,6 @@ assert CreateOK {
 
 check CreateOK for 3 but 2 Time
 
-
 pred Dispatch[t, t' : Time] {
 	some p : CProcess {
 		DispatchProcess[t, t', p]
@@ -54,6 +52,12 @@ pred Dispatch[t, t' : Time] {
 		currentAction.t' = DispatchAction
 	}
 }
+
+assert DispatchOK {
+	all t, t' : Time | Inv[t] and Dispatch[t, t'] => Inv[t']
+}
+
+check DispatchOK for 3 but 2 Time
 
 pred Timeout[t, t' : Time] {
 	some p : CProcess {
@@ -64,6 +68,12 @@ pred Timeout[t, t' : Time] {
 	}
 }
 
+assert TimeoutOK {
+	all t, t' : Time | Inv[t] and Timeout[t, t'] => Inv[t']
+}
+
+check TimeoutOK for 3 but 2 Time
+
 pred Block[t, t' : Time] {
 	some p : CProcess {
 		BlockProcess[t, t', p]
@@ -72,6 +82,12 @@ pred Block[t, t' : Time] {
 		currentAction.t' = BlockAction
 	}
 }
+
+assert BlockOK {
+	all t, t' : Time | Inv[t] and Block[t, t'] => Inv[t']
+}
+
+check BlockOK for 3 but 2 Time
 
 pred Wakeup[t, t' : Time] {
 	some p : CProcess {
@@ -82,6 +98,12 @@ pred Wakeup[t, t' : Time] {
 	}
 }
 
+assert WakeupOK {
+	all t, t' : Time | Inv[t] and Wakeup[t, t'] => Inv[t']
+}
+
+check WakeupOK for 3 but 2 Time
+
 pred DestroyReady[t, t' : Time] {
 	some p : CProcess {
 		DestroyReadyProcess[t, t', p]
@@ -90,6 +112,12 @@ pred DestroyReady[t, t' : Time] {
 		currentAction.t' = DestroyReadyAction
 	}
 }
+
+assert DestroyReadyOK {
+	all t, t' : Time | Inv[t] and DestroyReady[t, t'] => Inv[t']
+}
+
+check DestroyReadyOK for 3 but 2 Time
 
 pred DestroyCurrent[t, t' : Time] {
 	some p : CProcess {
@@ -100,6 +128,12 @@ pred DestroyCurrent[t, t' : Time] {
 	}
 }
 
+assert DestroyCurrentOK {
+	all t, t' : Time | Inv[t] and DestroyCurrent[t, t'] => Inv[t']
+}
+
+check DestroyCurrentOK for 3 but 2 Time
+
 pred DestroyBlocked[t, t' : Time] {
 	some p : CProcess {
 		DestroyBlockedProcess[t, t', p]
@@ -108,6 +142,12 @@ pred DestroyBlocked[t, t' : Time] {
 		currentAction.t' = DestroyBlockedAction
 	}
 }
+
+assert DestroyBlockedOK {
+	all t, t' : Time | Inv[t] and DestroyBlocked[t, t'] => Inv[t']
+}
+
+check DestroyBlockedOK for 3 but 2 Time
 
 pred	PreserveState[t, t' : Time, p : CProcess] {
 	all other : CProcess - p | PreserveStateProcess[t, t', other]
