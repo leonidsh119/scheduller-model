@@ -1,4 +1,4 @@
-module Process
+module scheduler
 open util/ordering[Time]
 
 sig Time {}
@@ -11,46 +11,46 @@ abstract sig Process {
 	state : PState one -> Time
 }
 
-pred CreateProcess[t, t' : Time, p : Process] {
+pred P_Create[t, t' : Time, p : Process] {
 	p.state.t = Free
 	p.state.t' = Ready
 }
 
-pred DispatchProcess[t, t' : Time, p : Process] {
+pred P_Dispatch[t, t' : Time, p : Process] {
 	p.state.t = Ready
 	p.state.t' = Current
 }
 
-pred TimeoutProcess[t, t' : Time, p : Process] {
+pred P_Timeout[t, t' : Time, p : Process] {
 	p.state.t = Current
 	p.state.t' = Ready
 }
 
-pred BlockProcess[t, t' : Time, p : Process] {
+pred P_Block[t, t' : Time, p : Process] {
 	p.state.t = Current
 	p.state.t' = Blocked
 }
 
-pred WakeupProcess[t, t' : Time, p : Process] {
+pred P_Wakeup[t, t' : Time, p : Process] {
 	p.state.t = Blocked
 	p.state.t' = Ready
 }
 
-pred DestroyReadyProcess[t, t' : Time, p : Process] {
+pred P_DestroyReady[t, t' : Time, p : Process] {
 	p.state.t = Ready
 	p.state.t' = Free
 }
 
-pred DestroyCurrentProcess[t, t' : Time, p : Process] {
+pred P_DestroyCurrent[t, t' : Time, p : Process] {
 	p.state.t = Blocked
 	p.state.t' = Free
 }
 
-pred DestroyBlockedProcess[t, t' : Time, p : Process] {
+pred P_DestroyBlocked[t, t' : Time, p : Process] {
 	p.state.t = Current
 	p.state.t' = Free
 }
 
-pred PreserveStateProcess[t, t' : Time, p : Process] {
+pred P_PreserveState[t, t' : Time, p : Process] {
 	p.state.t' = p.state.t
 }
