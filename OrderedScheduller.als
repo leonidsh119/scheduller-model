@@ -83,15 +83,15 @@ pred OS_DestroyBlocked[t, t' : Time, p : Process] {
 }
 
 pred OS_PerformSomeAction[t, t' : Time] {
-	some p : Process |
-		OS_Create[t, t']
-		or OS_Dispatch[t, t']
-		or OS_Timeout[t, t']
-		or OS_Block[t, t']
-		or OS_Wakeup[t, t', p]
+	OS_Create[t, t']
+	or OS_Dispatch[t, t']
+	or OS_Timeout[t, t']
+	or OS_Block[t, t']
+	or OS_DestroyCurrent[t, t']
+	or (some p : Process |
+		OS_Wakeup[t, t', p]
 		or OS_DestroyReady[t, t', p]
-		or OS_DestroyCurrent[t, t']
-		or OS_DestroyBlocked[t, t', p]
+		or OS_DestroyBlocked[t, t', p])
 }
 
 fact {
@@ -104,4 +104,4 @@ check {
 }
 
 run {
-} for 10 // Why I am not getting 10 processes in model?
+} for 8 // Why I am not getting enough processes in model?
