@@ -141,7 +141,6 @@ pred AS_PerformSomeAction[t, t' : Time] {
 }
 
 fact {
-	all t : Time | some p : Process | p.state.t = Free // Liveness
 	AS_Init[first]
 	all t, t' : Time | t -> t' in next => AS_PerformSomeAction[t, t']
 }
@@ -151,5 +150,6 @@ check {
 }
 
 run {
-} for 9 but 9 Process, 9 Time // Why I am not getting enough processes in model?
+//	all t : Time | some p : Process | p.state.t = Free // Liveness
+} for 9 but exactly 9 Process, 9 Time
 

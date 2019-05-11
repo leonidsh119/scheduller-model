@@ -1,0 +1,4 @@
+Get latest SchedulerAPI
+Try find connection between Audacity and Scheduler
+Alternatively try applying the model used in SchedulerAPI onto Audacity model
+The ProcessScheduler will appear as example for trying using the "free promotion method" without valuable result
