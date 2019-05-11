@@ -1,12 +1,11 @@
+open Process
 open Set[Process]
 
-sig Process {}
-
 sig Time {
+	current : lone Process,
 	ready : Set,
 	free : Set,
-	blocked : Set,
-	current : lone Process
+	blocked : Set
 } {
 	ready != free
 	ready != blocked
@@ -16,19 +15,19 @@ sig Time {
 pred inv[t : Time] {
 	// the sets and the current process are mutually exclusive
 	all p : Process | (t.current = p =>
-		Set_count[t.ready,p].add [
-		Set_count[t.blocked,p].add [
-		Set_count[t.free,p] ] ] = 0)
+		Set_count[t.ready, p].add [
+		Set_count[t.blocked, p].add [
+		Set_count[t.free, p]]] = 0)
 	all p : Process | (p != t.current =>
-		Set_count[t.ready,p].add [
-		Set_count[t.blocked,p].add [
-		Set_count[t.free,p] ] ] = 1)
+		Set_count[t.ready, p].add[
+		Set_count[t.blocked, p].add[
+		Set_count[t.free, p]]] = 1)
 	// every process is either ready, blocked, free or current
 	all p : Process |
-		Set_exists[t.ready,p] or
-		Set_exists[t.blocked,p] or
-		Set_exists[t.free,p] or
 		t.current = p
+		or Set_exists[t.ready, p]
+		or Set_exists[t.blocked, p]
+		or Set_exists[t.free, p]
  }
 
 run RunInv { 
@@ -36,10 +35,10 @@ run RunInv {
 } for 4 but 1 Time
 
 pred Init[t : Time] {
+	no t.current
 	no p : Process | Set_exists[t.ready, p] 
 	no p : Process | Set_exists[t.blocked, p] 
 	all p : Process | Set_exists[t.free, p]
-	no t.current 
 }
 
 run RunInit { 
@@ -51,10 +50,10 @@ check CheckInit {
 } for 4
 
 pred Create[t, t' : Time, pout : Process] {
+	t'.current = t.current
 	Set_remove_any[t.free, t'.free, pout]
 	Set_add[t.ready, t'.ready, pout]
-	t'.current = t.current
-	Set_equal[t'.blocked, t.blocked]
+	Set_equal[t.blocked, t'.blocked]
 }
 
 run RunCreate { 
@@ -70,8 +69,8 @@ check CheckCreate {
 pred Dispatch[t, t' : Time, pout : Process] {
 	no t.current 
 	not Set_empty[t.ready]
-	Set_equal[t'.blocked, t.blocked]
-	Set_equal[t'.free, t.free]
+	Set_equal[t.blocked, t'.blocked]
+	Set_equal[t.free, t'.free]
 	Set_remove_any[t.ready, t'.ready, pout]
 	t'.current = pout
 }
