@@ -31,7 +31,7 @@ pred inv[t : Time] {
 		t.current = p
  }
 
-run { 
+run RunInv { 
 	some t : Time | inv[t] 
 } for 4 but 1 Time
 
@@ -42,7 +42,7 @@ pred Init[t : Time] {
 	no t.current 
 }
 
-run { 
+run RunInit { 
 	some t : Time | Init[t] 
 } for 4 but 1 Time
 
@@ -57,7 +57,7 @@ pred Create[t, t' : Time, pout : Process] {
 	Set_equal[t'.blocked, t.blocked]
 }
 
-run { 
+run RunCreate { 
 	some t, t' : Time, p : Process | 
 		inv[t] and Create[t, t', p] 
 } for 4 but 2 Time
@@ -76,7 +76,7 @@ pred Dispatch[t, t' : Time, pout : Process] {
 	t'.current = pout
 }
 
-run { 
+run RunDispatch { 
 	some t, t' : Time, pout : Process | 
 		inv[t] and Dispatch[t, t', pout] 
 } for 4 but 2 Time
@@ -88,7 +88,7 @@ check CheckDispatch {
 			inv[t] and Dispatch[t, t', pout] => inv[t']
 } for 4 but 2 Time
 
-pred Timeout[t, t' : Time, p : Process] {
+pred TimeOut[t, t' : Time, p : Process] {
 	t.current = p
 	no t'.current 
 	Set_add[t.ready, t'.ready, p]
@@ -96,14 +96,14 @@ pred Timeout[t, t' : Time, p : Process] {
 	Set_equal[t'.free, t.free]
 }
 
-run { 
+run RunTimeOut { 
 	some t, t' : Time, p : Process | 
-		inv[t] and Timeout[t, t', p] 
+		inv[t] and TimeOut[t, t', p] 
 } for 4 but 2 Time
 
-check CheckTimeout { 
+check CheckTimeOut { 
 	all t, t' : Time, p : Process | 
-		inv[t] and Timeout[t, t', p] => inv[t'] 
+		inv[t] and TimeOut[t, t', p] => inv[t'] 
 } for 4
 
 pred Block[t, t' : Time, p : Process] {
@@ -114,7 +114,7 @@ pred Block[t, t' : Time, p : Process] {
 	Set_equal[t'.free, t.free]
 }
 
-run { 
+run RunBlock { 
 	some t, t' : Time, p : Process | 
 		inv[t] and Block[t, t', p] 
 } for 4 but 2 Time
@@ -132,7 +132,7 @@ pred WakeUp[t, t' : Time, p : Process] {
 	Set_equal[t'.free, t.free]
 }
 
-run { 
+run RunWakeUp { 
 	some t, t' : Time, p : Process | 
 		inv[t] and WakeUp[t, t', p] 
 } for 4 but 2 Time
