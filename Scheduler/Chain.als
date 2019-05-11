@@ -14,6 +14,8 @@ pred retrieve[s : Set , c : Chain] {
 
 pred Chain_empty[c : Chain] {
 	no c.head
+	no c.last
+	no c.next
 }
 
 pred Chain_exists[c : Chain, p : T] {
@@ -45,6 +47,7 @@ check {
 pred Chain_inv[c : Chain] {
 	no iden & c.next
 	some c.head => some c.last
+	no c.head => (no c.last and no c.next)
 	c.last in (c.head).*(c.next)
 	no (c.last).(c.next)
 	(c.head = c.last) => no c.next
@@ -111,9 +114,7 @@ pred Chain_pop_last_one[c, c' : Chain, p : T] {
 }
 
 pred Chain_pop_more_than_one[c,c':Chain, p :T] {
-
 	c.last != c.head
-
 	c'.head = c.head
 	(c'.last).(c.next) = c.last
 	c'.next = c.next - (c'.last -> c.last)
@@ -130,12 +131,12 @@ check {
 } for 3 but 2 Set, 2 Chain
 
 assert ChainPopSetRemoveAny {
-	all s,s':Set, c,c':Chain | {
-		retrieve[s,c] 
-		retrieve[s',c'] 
+	all s, s' : Set, c, c' : Chain | {
+		retrieve[s, c] 
+		retrieve[s', c'] 
 		Chain_inv[c]  
-		(some p : T | Chain_pop[c,c',p])
-	} => (some p : T | Set_remove_any[s,s',p])
+		(some p : T | Chain_pop[c, c', p])
+	} => (some p : T | Set_remove_any[s, s', p])
 } 
 
 check ChainPopSetRemoveAny for 3 but 2 Set, 2 Chain

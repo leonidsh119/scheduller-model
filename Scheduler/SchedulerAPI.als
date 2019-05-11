@@ -36,8 +36,8 @@ run RunInv {
 
 pred Init[t : Time] {
 	no t.current
-	no p : Process | Set_exists[t.ready, p] 
-	no p : Process | Set_exists[t.blocked, p] 
+	Set_empty[t.ready] 
+	Set_empty[t.blocked] 
 	all p : Process | Set_exists[t.free, p]
 }
 
