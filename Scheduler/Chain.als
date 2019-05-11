@@ -92,7 +92,7 @@ check {
 		retrieve[s,c] 
 		retrieve[s',c'] 
 		Chain_push[c,c',p] 
-		} => Set_add[s,s',p] 
+	} => Set_add[s,s',p] 
 } for 3 but 2 Set, 2 Chain
 
 pred Chain_pop[c,c':Chain, p : T] {
