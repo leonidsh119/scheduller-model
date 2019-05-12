@@ -71,12 +71,22 @@ pred Chain_push_non_empty[c, c' : Chain, p : T] {
 	c'.last = c.last
 }
 
+check CheckChainPushNonEmpty {
+	all c , c' : Chain, p : T | 
+		Chain_inv[c] and Chain_push_non_empty[c, c', p] => Chain_inv[c']
+} for 4 but 2 Chain
+
 pred Chain_push_empty[c, c' :  Chain, p : T] {
 	Chain_empty[c]
 	c'.next = c.next
 	c'.head = p
 	c'.last = p
 }
+
+check CheckChainPushEmpty {
+	all c , c' : Chain, p : T | 
+		Chain_inv[c] and Chain_push_empty[c, c', p] => Chain_inv[c']
+} for 4 but 2 Chain
 
 pred Chain_push[c, c' : Chain, p : T] {
 	not Chain_exists[c, p]
