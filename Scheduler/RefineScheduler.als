@@ -7,9 +7,9 @@ open CScheduler
 pred retrieve[at : AScheduler/Time, ct : CScheduler/Time]
 {
 	ct.current = at.current
-	Chain/retrieve[at.ready, ct.ready]
-	Chain/retrieve[at.free, ct.free]
-	Chain/retrieve[at.blocked, ct.blocked]
+	Chain/Retrieve[at.ready, ct.ready]
+	Chain/Retrieve[at.free, ct.free]
+	Chain/Retrieve[at.blocked, ct.blocked]
 }
 
 check CheckRefinmentCreate {
