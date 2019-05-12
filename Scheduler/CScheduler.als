@@ -51,7 +51,7 @@ run RunInit {
 
 check CheckInit { 
 	all t : Time | Init[t] => inv[t] 
-} for 4
+} for 4 but 1 Time
 
 pred Create[t, t' : Time, pout : Process] {
 	t'.current = t.current
@@ -69,7 +69,7 @@ run RunCreate {
 check CheckCreate { 
 	all t, t' : Time, p : Process |
 		inv[t] and Create[t, t', p] => inv[t']
-} for 3 but 2 Time
+} for 4 but 2 Time
 
 pred Dispatch[t, t' : Time, pout : Process] {
 	no t.current 
@@ -86,10 +86,8 @@ run RunDispatch {
 } for 4 but 2 Time
 
 check CheckDispatch { 
-	all t, t' : Time | 
-		Chain_empty[t.ready] or 
-		some pout : Process | 
-			inv[t] and Dispatch[t, t', pout] => inv[t']
+	all t, t' : Time, pout : Process | 
+		inv[t] and Dispatch[t, t', pout] => inv[t']
 } for 4 but 2 Time
 
 pred TimeOut[t, t' : Time, p : Process] {
@@ -126,7 +124,7 @@ run RunBlock {
 check CheckBlock {
 	all t, t' : Time, p : Process | 
 		inv[t] and Block[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred WakeUp[t, t' : Time, p : Process] {
 	t'.current = t.current
@@ -144,7 +142,7 @@ run RunWakeUp {
 check CheckWakeUp { 
 	all t, t' : Time, p : Process | 
 		inv[t] and WakeUp[t, t', p] => inv[t'] 
-} for 3 but 2 Time
+} for 4 but 2 Time
 
 pred DestroyCurrent[t, t' : Time, p : Process] {
 	p = t.current
@@ -164,7 +162,7 @@ check CheckDestroyCurrent {
 		no t'.current or
 		some p : Process | 
 			inv[t] and DestroyCurrent[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred DestroyReady[t, t' : Time, p : Process] {
 	t.current = t'.current
@@ -184,7 +182,7 @@ check CheckDestroyReady {
 		Chain_empty[t.ready] or 
 		some p : Process |
 			inv[t] and DestroyReady[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred DestroyBlocked[t, t' : Time, p : Process] {
 	t.current = t'.current
@@ -204,7 +202,7 @@ check CheckDestroyBlocked {
 		Chain_empty[t.blocked] or 
 		some p : Process |
 			inv[t] and DestroyBlocked[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred Destroy[t, t' : Time, p : Process] {
 	DestroyCurrent[t, t', p] or
@@ -222,5 +220,4 @@ check CheckDestroy {
 		Chain_empty[t.blocked] or 
 		some p : Process |
 			inv[t] and Destroy[t, t', p] => inv[t'] 
-} for 4
-
+} for 4 but 2 Time

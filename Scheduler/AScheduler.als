@@ -13,8 +13,8 @@ sig Time {
 pred inv[t : Time] {
 	// the sets and the current process are mutually exclusive
 	all p : Process | (t.current = p =>
-		Set_count[t.ready, p].add [
-		Set_count[t.blocked, p].add [
+		Set_count[t.ready, p].add[
+		Set_count[t.blocked, p].add[
 		Set_count[t.free, p]]] = 0)
 	all p : Process | (p != t.current =>
 		Set_count[t.ready, p].add[
@@ -26,6 +26,9 @@ pred inv[t : Time] {
 		or Set_exists[t.ready, p]
 		or Set_exists[t.blocked, p]
 		or Set_exists[t.free, p]
+	Set_inv[t.ready]
+	Set_inv[t.free]
+	Set_inv[t.blocked]
  }
 
 run RunInv { 
@@ -35,8 +38,11 @@ run RunInv {
 pred Init[t : Time] {
 	no t.current
 	Set_empty[t.ready] 
-	Set_empty[t.blocked] 
+	Set_empty[t.blocked]
 	all p : Process | Set_exists[t.free, p]
+	Set_inv[t.ready]
+	Set_inv[t.free]
+	Set_inv[t.blocked]
 }
 
 run RunInit { 
@@ -45,10 +51,11 @@ run RunInit {
 
 check CheckInit { 
 	all t : Time | Init[t] => inv[t] 
-} for 4
+} for 4 but 1 Time
 
 pred Create[t, t' : Time, pout : Process] {
 	t'.current = t.current
+	Set_exists[t.free, pout]
 	Set_remove_any[t.free, t'.free, pout]
 	Set_add[t.ready, t'.ready, pout]
 	Set_equal[t.blocked, t'.blocked]
@@ -60,8 +67,8 @@ run RunCreate {
 } for 4 but 2 Time
 
 check CheckCreate { 
-	all t, t' : Time, p : Process | 
-		inv[t] and Create[t, t', p] => inv[t'] 
+	all t, t' : Time, p : Process |
+		inv[t] and Create[t, t', p] => inv[t']
 } for 4 but 2 Time
 
 pred Dispatch[t, t' : Time, pout : Process] {
@@ -78,10 +85,9 @@ run RunDispatch {
 		inv[t] and Dispatch[t, t', pout] 
 } for 4 but 2 Time
 
-
 check CheckDispatch { 
 	all t, t' : Time, pout : Process | 
-		(inv[t] and Dispatch[t, t', pout]) => inv[t']
+		inv[t] and Dispatch[t, t', pout] => inv[t']
 } for 4 but 2 Time
 
 pred TimeOut[t, t' : Time, p : Process] {
@@ -100,7 +106,7 @@ run RunTimeOut {
 check CheckTimeOut { 
 	all t, t' : Time, p : Process | 
 		inv[t] and TimeOut[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred Block[t, t' : Time, p : Process] {
 	t.current = p
@@ -118,11 +124,11 @@ run RunBlock {
 check CheckBlock {
 	all t, t' : Time, p : Process | 
 		inv[t] and Block[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred WakeUp[t, t' : Time, p : Process] {
-	Set_exists[t.blocked, p]
 	t'.current = t.current
+	Set_exists[t.blocked, p]
 	Set_add[t.ready, t'.ready, p]
 	Set_remove[t.blocked, t'.blocked, p]
 	Set_equal[t'.free, t.free]
@@ -136,7 +142,7 @@ run RunWakeUp {
 check CheckWakeUp { 
 	all t, t' : Time, p : Process | 
 		inv[t] and WakeUp[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred DestroyCurrent[t, t' : Time, p : Process] {
 	p = t.current
@@ -156,7 +162,7 @@ check CheckDestroyCurrent {
 		no t'.current or
 		some p : Process | 
 			inv[t] and DestroyCurrent[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred DestroyReady[t, t' : Time, p : Process] {
 	t.current = t'.current
@@ -176,7 +182,7 @@ check CheckDestroyReady {
 		Set_empty[t.ready] or 
 		some p : Process |
 			inv[t] and DestroyReady[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred DestroyBlocked[t, t' : Time, p : Process] {
 	t.current = t'.current
@@ -196,7 +202,7 @@ check CheckDestroyBlocked {
 		Set_empty[t.blocked] or 
 		some p : Process |
 			inv[t] and DestroyBlocked[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred Destroy[t, t' : Time, p : Process] {
 	DestroyCurrent[t, t', p] or
@@ -214,4 +220,4 @@ check CheckDestroy {
 		Set_empty[t.blocked] or 
 		some p : Process |
 			inv[t] and Destroy[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time

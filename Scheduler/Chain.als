@@ -8,7 +8,7 @@ sig Chain {
 	next : T lone -> lone T
 }
 
-pred retrieve[s : Set , c : Chain] {
+pred retrieve[s : Set, c : Chain] {
 	s.items = (c.head).*(c.next)
 }
 
@@ -46,7 +46,7 @@ check {
 
 pred Chain_inv[c : Chain] {
 	no iden & c.next
-	some c.head => some c.last
+	some c.head => some c.last and (#(c.next) = sub[#((c.head).*(c.next)), 1])
 	no c.head => (no c.last and no c.next)
 	c.last in (c.head).*(c.next)
 	no (c.last).(c.next)
@@ -66,6 +66,7 @@ check {
 
 pred Chain_push_non_empty[c, c' : Chain, p : T] {
 	not Chain_empty[c]
+	not Chain_exists[c, p]
 	c'.next = c.next + p -> c.head
 	c'.head = p
 	c'.last = c.last
@@ -124,7 +125,7 @@ pred Chain_pop_last_one[c, c' : Chain, p : T] {
 	no c'.next
 }
 
-pred Chain_pop_more_than_one[c,c':Chain, p :T] {
+pred Chain_pop_more_than_one[c, c' : Chain, p : T] {
 	c.last != c.head
 	c'.head = c.head
 	(c'.last).(c.next) = c.last
@@ -132,13 +133,13 @@ pred Chain_pop_more_than_one[c,c':Chain, p :T] {
 }
 
 run { 
-	some c,c':Chain, p : T | Chain_inv[c] and Chain_pop[c,c',p] 
+	some c, c' : Chain, p : T | Chain_inv[c] and Chain_pop[c, c', p] 
 } for 3 but 2 Chain, 0 Set
 
 check {
-	all s,s' :Set, c,c' :Chain , p :T |
-		Set_remove[s,s',p] and retrieve[s,c] and Chain_inv[c] and Chain_pop[c,c',p] 
-			=> retrieve[s',c']
+	all s, s' : Set, c, c' : Chain , p : T |
+		Set_remove[s, s', p] and retrieve[s, c] and Chain_inv[c] and Chain_pop[c, c', p] 
+			=> retrieve[s', c']
 } for 3 but 2 Set, 2 Chain
 
 assert ChainPopSetRemoveAny {
@@ -153,9 +154,9 @@ assert ChainPopSetRemoveAny {
 check ChainPopSetRemoveAny for 3 but 2 Set, 2 Chain
 
 pred Chain_remove[c, c' : Chain, p : T] {
-	Chain_remove_first[c,c',p] or 
-	Chain_remove_last[c,c',p] or 
-	Chain_remove_middle[c,c',p]
+	Chain_remove_first[c, c', p] or 
+	Chain_remove_last[c, c', p] or 
+	Chain_remove_middle[c, c', p]
 }
 
 pred Chain_remove_first[c, c' : Chain, p : T] {

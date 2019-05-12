@@ -16,6 +16,8 @@ fun Set_count[s : Set, p : T] : Int {
 	#(p <: s.items)
 }
 
+pred Set_inv[s : Set] {}
+
 pred Set_equal[s, t : Set] {
 	s.items = t.items
 }
