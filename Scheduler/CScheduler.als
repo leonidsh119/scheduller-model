@@ -8,10 +8,6 @@ sig Time {
 	ready : Chain,
 	free : Chain,
 	blocked : Chain
-} {
-	ready != free
-	ready != blocked
-	free != blocked
 }
 
 pred inv[t : Time] {
@@ -29,7 +25,10 @@ pred inv[t : Time] {
 		t.current = p
 		or Chain_exists[t.ready, p]
 		or Chain_exists[t.blocked, p]
-		or Chain_exists[t.free, p] 
+		or Chain_exists[t.free, p]
+	Chain_inv[t.ready]
+	Chain_inv[t.free]
+	Chain_inv[t.blocked]
  }
 
 run RunInv { 
@@ -39,8 +38,11 @@ run RunInv {
 pred Init[t : Time] {
 	no t.current
 	Chain_empty[t.ready] 
-	Chain_empty[t.blocked] 
+	Chain_empty[t.blocked]
 	all p : Process | Chain_exists[t.free, p]
+	Chain_inv[t.ready]
+	Chain_inv[t.free]
+	Chain_inv[t.blocked]
 }
 
 run RunInit { 
@@ -53,6 +55,7 @@ check CheckInit {
 
 pred Create[t, t' : Time, pout : Process] {
 	t'.current = t.current
+	Chain_exists[t.free, pout]
 	Chain_pop[t.free, t'.free, pout]
 	Chain_push[t.ready, t'.ready, pout]
 	Chain_equal[t.blocked, t'.blocked]
@@ -66,11 +69,11 @@ run RunCreate {
 check CheckCreate { 
 	all t, t' : Time, p : Process |
 		inv[t] and Create[t, t', p] => inv[t']
-} for 4 but 2 Time
+} for 3 but 2 Time
 
 pred Dispatch[t, t' : Time, pout : Process] {
 	no t.current 
-	not Chain_empty[t.ready]
+	Chain_exists[t.ready, pout]
 	Chain_equal[t.blocked, t'.blocked]
 	Chain_equal[t.free, t'.free]
 	Chain_pop[t.ready, t'.ready, pout]
@@ -105,7 +108,7 @@ run RunTimeOut {
 check CheckTimeOut { 
 	all t, t' : Time, p : Process | 
 		inv[t] and TimeOut[t, t', p] => inv[t'] 
-} for 4
+} for 4 but 2 Time
 
 pred Block[t, t' : Time, p : Process] {
 	t.current = p
@@ -126,8 +129,8 @@ check CheckBlock {
 } for 4
 
 pred WakeUp[t, t' : Time, p : Process] {
-	Chain_exists[t.blocked, p]
 	t'.current = t.current
+	Chain_exists[t.blocked, p]
 	Chain_push[t.ready, t'.ready, p]
 	Chain_remove[t.blocked, t'.blocked, p]
 	Chain_equal[t'.free, t.free]
@@ -141,7 +144,7 @@ run RunWakeUp {
 check CheckWakeUp { 
 	all t, t' : Time, p : Process | 
 		inv[t] and WakeUp[t, t', p] => inv[t'] 
-} for 4
+} for 3 but 2 Time
 
 pred DestroyCurrent[t, t' : Time, p : Process] {
 	p = t.current

@@ -50,6 +50,7 @@ pred Chain_inv[c : Chain] {
 	no c.head => (no c.last and no c.next)
 	c.last in (c.head).*(c.next)
 	no (c.last).(c.next)
+	no (c.next).(c.head)
 	(c.head = c.last) => no c.next
 }
 
@@ -85,12 +86,12 @@ pred Chain_push[c, c' : Chain, p : T] {
 run { 
 	some c, c' : Chain, p : T | 
 		Chain_inv[c] and Chain_push[c, c', p] 
-} for 3 but 2 Chain, 0 Set
+} for 3 but 2 Chain
 
-check {
+check CheckChainPush {
 	all c , c' : Chain, p : T | 
 		Chain_inv[c] and Chain_push[c, c', p] => Chain_inv[c']
-} for 3 but 2 Chain, 0 Set
+} for 4 but 2 Chain
 
 check {
 	all s, s' : Set, c, c' : Chain, p : T | {
@@ -157,12 +158,25 @@ pred Chain_remove_first_lone[c, c' : Chain, p : T] {
 	Chain_pop_last_one[c, c', p]
 }
 
+check CheckChainRemoveFirstLone {
+	all c, c' : Chain, p : T |
+		Chain_inv[c] 
+		and Chain_remove_first_lone[c, c', p] => Chain_inv[c']
+} for 3 but 0 Set, 2 Chain
+
 pred Chain_remove_first_many[c, c' : Chain, p : T] {
+	c.head != c.last
 	c.head = p
 	c'.head = (c.head).(c.next)
 	c'.next = c.next - (c.head -> c'.head)
 	c'.last = c.last
 }
+
+check CheckChainRemoveFirstMany {
+	all c, c' : Chain, p : T |
+		Chain_inv[c] 
+		and Chain_remove_first_many[c, c', p] => Chain_inv[c']
+} for 3 but 0 Set, 2 Chain
 
 pred Chain_remove_last[c, c' : Chain, p : T] {
 	Chain_pop[c, c', p]

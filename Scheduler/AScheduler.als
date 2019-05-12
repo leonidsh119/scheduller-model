@@ -8,10 +8,6 @@ sig Time {
 	ready : Set,
 	free : Set,
 	blocked : Set
-} {
-	ready != free
-	ready != blocked
-	free != blocked
 }
 
 pred inv[t : Time] {
@@ -70,7 +66,7 @@ check CheckCreate {
 
 pred Dispatch[t, t' : Time, pout : Process] {
 	no t.current 
-	not Set_empty[t.ready]
+	Set_exists[t.ready, pout]
 	Set_equal[t.blocked, t'.blocked]
 	Set_equal[t.free, t'.free]
 	Set_remove_any[t.ready, t'.ready, pout]
@@ -82,11 +78,10 @@ run RunDispatch {
 		inv[t] and Dispatch[t, t', pout] 
 } for 4 but 2 Time
 
+
 check CheckDispatch { 
-	all t, t' : Time | 
-		Set_empty[t.ready] or 
-		some pout : Process | 
-			inv[t] and Dispatch[t, t', pout] => inv[t']
+	all t, t' : Time, pout : Process | 
+		(inv[t] and Dispatch[t, t', pout]) => inv[t']
 } for 4 but 2 Time
 
 pred TimeOut[t, t' : Time, p : Process] {
