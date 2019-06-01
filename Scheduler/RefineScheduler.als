@@ -13,16 +13,16 @@ pred retrieve[at : AScheduler/Time, ct : CScheduler/Time]
 }
 
 check CheckRefinmentCreate {
-	all at, at' : AScheduler/Time, ct, ct' : CScheduler/Time, pout : Process | 
-		(retrieve[at, ct] and retrieve[at', ct']) => 
-			(AScheduler/Create[at, at', pout] iff CScheduler/Create[ct, ct', pout])
-}
+	all at,at' : AScheduler/Time, ct, ct' : CScheduler/Time, pout : Process | 
+		(AScheduler/inv[at] and CScheduler/inv[ct] and retrieve[at, ct]  and retrieve[at', ct'] and CScheduler/Create[ct, ct', pout] )
+			=> (AScheduler/Create[at, at', pout])
+} for 5 but 2 AScheduler/Time, 2 CScheduler/Time
 
 check CheckRefinmentDispatch {
 	all at, at' : AScheduler/Time, ct, ct' : CScheduler/Time, pout : Process | 
 		(retrieve[at, ct] and retrieve[at', ct']) => 
 			(AScheduler/Dispatch[at, at', pout] iff CScheduler/Dispatch[ct, ct', pout])
-}
+} for 3 but 2 AScheduler/Time, 2 CScheduler/Time
 
 check CheckRefinmentTimeOut {
 	all at, at' : AScheduler/Time, ct, ct' : CScheduler/Time, pout : Process | 
